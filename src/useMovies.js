@@ -6,6 +6,7 @@ export function useMovies(query) {
   const [error, setError] = useState("");
   useEffect(
     function () {
+      // callback?.();
       const controller = new AbortController();
       async function fetchMovies() {
         try {
@@ -35,7 +36,7 @@ export function useMovies(query) {
         setError("");
         return;
       }
-      // handleCloseMovie();
+
       fetchMovies();
       return function () {
         controller.abort();
