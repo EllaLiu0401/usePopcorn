@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { useEffect } from "react";
 import StarRating from "./StarRating";
+import { useMovies } from "./useMovies";
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
@@ -9,10 +10,8 @@ const KEY = "bb6d25ce";
 
 export default function App() {
   const [query, setQuery] = useState("");
-  const [movies, setMovies] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
   const [selectedId, setSlectedId] = useState(null);
+  const { movies, isLoading, error } = useMovies(query);
   // const [watched, setWatched] = useState([]);
   const [watched, setWatched] = useState(function () {
     const storedValue = localStorage.getItem("watched");
@@ -41,46 +40,6 @@ export default function App() {
       localStorage.setItem("watched", JSON.stringify([...watched]));
     },
     [watched]
-  );
-
-  useEffect(
-    function () {
-      const controller = new AbortController();
-      async function fetchMovies() {
-        try {
-          setIsLoading(true);
-          setError("");
-          const res = await fetch(
-            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
-            { signal: controller.signal }
-          );
-          if (!res.ok)
-            throw new Error("Something went wrong with fetching movies");
-          const data = await res.json();
-          if (data.Response === "False") throw new Error("Movie not fount");
-          setMovies(data.Search);
-          setError("");
-        } catch (error) {
-          if (error.name !== "AbortError") {
-            console.log(error.message);
-            setError(error.message);
-          }
-        } finally {
-          setIsLoading(false);
-        }
-      }
-      if (query.length < 3) {
-        setMovies([]);
-        setError("");
-        return;
-      }
-      handleCloseMovie();
-      fetchMovies();
-      return function () {
-        controller.abort();
-      };
-    },
-    [query]
   );
 
   return (
